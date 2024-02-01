@@ -1,4 +1,4 @@
-import { PAYMENTS_SERVICE } from '@app/common';
+import { NOTIFICATION_SERVICE, PAYMENTS_SERVICE, UserDto } from '@app/common';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { map } from 'rxjs';
@@ -11,17 +11,23 @@ export class ReservationsService {
   constructor(
     private readonly reservationsRepository: ReservationsRepository,
     @Inject(PAYMENTS_SERVICE) private readonly paymentService: ClientProxy,
+    @Inject(NOTIFICATION_SERVICE)
+    private readonly notificationService: ClientProxy,
   ) {}
-  async create(createReservationDto: CreateReservationDto, userId: string) {
+  async create(createReservationDto: CreateReservationDto, user: UserDto) {
     return this.paymentService
       .send('create_charge', createReservationDto.charge)
       .pipe(
         map(async (res) => {
+          this.notificationService.emit('create_notification', {
+            email: user.email,
+          });
+
           return await this.reservationsRepository.create({
             ...createReservationDto,
             invoiceId: res.id,
             timestamp: new Date(),
-            userId,
+            userId: user._id,
           });
         }),
       );

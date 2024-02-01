@@ -30,8 +30,6 @@ export class UsersService {
         email: createUserDto.email,
       });
 
-      console.log(user);
-
       return user ? true : false;
     } catch (err) {
       return false;

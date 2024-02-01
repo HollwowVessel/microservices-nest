@@ -2,6 +2,7 @@ import {
   AUTH_SERVICE,
   DatabaseModule,
   LoggerModule,
+  NOTIFICATION_SERVICE,
   PAYMENTS_SERVICE,
 } from '@app/common';
 
@@ -54,6 +55,17 @@ import { ReservationsService } from './reservations.service';
           options: {
             host: configService.get('PAYMENTS_HOST'),
             port: configService.get('PAYMENTS_PORT'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: NOTIFICATION_SERVICE,
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get('NOTIFICATIONS_HOST'),
+            port: configService.get('NOTIFICATIONS_PORT'),
           },
         }),
         inject: [ConfigService],
