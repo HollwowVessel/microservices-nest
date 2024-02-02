@@ -9,6 +9,7 @@ import { AuthModule } from './auth.module';
 async function bootstrap() {
   const app = await NestFactory.create(AuthModule);
   const configService = app.get(ConfigService);
+
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
@@ -16,6 +17,15 @@ async function bootstrap() {
       queue: 'auth',
     },
   });
+
+  app.connectMicroservice({
+    transport: Transport.TCP,
+    options: {
+      host: '0.0.0.0',
+      port: configService.getOrThrow('TCP_PORT'),
+    },
+  });
+
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useLogger(app.get(Logger));
   app.use(cookieParser());
